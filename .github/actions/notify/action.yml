@@ -8,6 +8,9 @@ inputs:
   slack_id:
     description: Slack user/owner id (from secrets.SLACKID)
     required: true
+  data:
+    description: JSON stringify data
+    required: false
 
 runs:
   using: composite
@@ -18,4 +21,4 @@ runs:
         url: ${{ inputs.webhook_url }}
         method: "POST"
         customHeaders: '{"Content-Type": "application/json"}'
-        data: '{"owner":"${{ github.repository_owner }}","repoName":"${{ github.repository }}","branch":"${{ github.ref_name || github.head_ref }}","buildUrl":"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}","slackUserId":"${{ inputs.slack_id }}"}'
+        data: ${{ inputs.data != '' && inputs.data || format('{{"owner":"{0}","repoName":"{1}","branch":"{2}","buildUrl":"{3}/{1}/actions/runs/{4}","slackUserId":"{5}"}}', github.repository_owner, github.repository, github.ref_name || github.head_ref, github.server_url, github.run_id, inputs.slack_id) }}
