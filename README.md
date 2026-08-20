@@ -1,4 +1,4 @@
-# gem-fe-actions
+# Actions
 
 Reusable [composite GitHub Actions](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action) shared across repositories.
 
