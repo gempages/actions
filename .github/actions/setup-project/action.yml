@@ -1,0 +1,53 @@
+name: Setup Project
+description: Shared setup — checkout code, set up Node, install dependencies with yarn.
+
+inputs:
+  node-version:
+    description: Node.js version to install
+    required: false
+    default: "24.14.0"
+  fetch-depth:
+    description: Git fetch depth for checkout
+    required: false
+    default: "1"
+  ref:
+    description: Git ref / SHA to check out (defaults to the triggering ref)
+    required: false
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
+  cache:
+    description: "Package manager cache for setup-node (e.g. 'yarn'). Empty disables caching."
+    required: false
+    default: ""
+  cache-dependency-path:
+    description: Path to the lockfile used as the cache key
+    required: false
+    default: ""
+  install:
+    description: Whether to run yarn install
+    required: false
+    default: "true"
+  install-args:
+    description: "Args passed to yarn install (e.g. '--frozen-lockfile', '--production', or '')"
+    required: false
+    default: "--frozen-lockfile"
+
+runs:
+  using: composite
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        ref: ${{ inputs.ref }}
+
+    - name: Use Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.cache }}
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - name: Install Dependencies
+      if: ${{ inputs.install == 'true' }}
+      run: yarn install ${{ inputs.install-args }}
+      shell: bash

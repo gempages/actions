@@ -1,0 +1,21 @@
+name: Notify
+description: Send a notification via webhook to Slack.
+
+inputs:
+  webhook_url:
+    description: Slack trigger webhook URL for this event
+    required: true
+  slack_id:
+    description: Slack user/owner id (from secrets.SLACKID)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Send notification
+      uses: fjogeleit/http-request-action@v2
+      with:
+        url: ${{ inputs.webhook_url }}
+        method: "POST"
+        customHeaders: '{"Content-Type": "application/json"}'
+        data: '{"owner":"${{ github.repository_owner }}","repoName":"${{ github.repository }}","branch":"${{ github.ref_name || github.head_ref }}","buildUrl":"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}","slackUserId":"${{ inputs.slack_id }}"}'
