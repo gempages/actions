@@ -29,7 +29,7 @@ inputs:
   install-args:
     description: "Args passed to yarn install (e.g. '--frozen-lockfile', '--production', or '')"
     required: false
-    default: "--frozen-lockfile"
+    default: ""
 
 runs:
   using: composite
