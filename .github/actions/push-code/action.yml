@@ -1,0 +1,22 @@
+name: Push Code
+description: Commit and push whatever is in the working tree, as an auto deploy commit.
+
+inputs:
+  should_deploy:
+    description: Gate from setup-git's should_deploy output; skips this action when not 'true'
+    required: true
+  commit_message:
+    description: Commit message (a timestamp is appended if it doesn't already contain one)
+    required: false
+    default: "Auto deploy"
+
+runs:
+  using: composite
+  steps:
+    - name: Push code
+      if: inputs.should_deploy == 'true'
+      shell: bash
+      run: |
+        git commit --allow-empty -m "${{ inputs.commit_message }} $(date +'%Y%m%d-%H%M%S')" -n
+        git push
+        echo "Auto deploy $(date +'%Y%m%d-%H%M%S')"

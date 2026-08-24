@@ -1,0 +1,47 @@
+name: Setup Git
+description: Checkout the repo and configure git for an automated commit, gated on the commit author.
+
+inputs:
+  token:
+    description: Token used to check out the repository (e.g. secrets.GH_ACTION_TOKEN)
+    required: true
+  fetch-depth:
+    description: Git fetch depth for checkout
+    required: false
+    default: "1"
+  excluded_authors:
+    description: JSON array of commit author usernames that should NOT trigger auto deploy
+    required: false
+    default: '["haicaodac","HarrisonD-Seal","TheoVu197","VinhVictor","github-actions[bot]"]'
+
+outputs:
+  should_deploy:
+    description: "'true' unless the triggering commit's author is in excluded_authors"
+    value: ${{ steps.check.outputs.should_deploy }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check auto deploy condition
+      id: check
+      shell: bash
+      run: |
+        echo "Actor: ${{ github.actor }}"
+        echo "Author: ${{ github.event.head_commit.author.username }}"
+        SHOULD_DEPLOY=${{ !contains(fromJson(inputs.excluded_authors), github.event.head_commit.author.username) }}
+        echo "Should deploy: $SHOULD_DEPLOY"
+        echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout repository
+      if: steps.check.outputs.should_deploy == 'true'
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        token: ${{ inputs.token }}
+
+    - name: Set up Git
+      if: steps.check.outputs.should_deploy == 'true'
+      shell: bash
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
