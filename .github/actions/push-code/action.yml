@@ -16,6 +16,8 @@ runs:
     - name: Push code
       if: inputs.should_deploy == 'true'
       shell: bash
+      env:
+        TZ: Asia/Ho_Chi_Minh
       run: |
         git commit --allow-empty -m "${{ inputs.commit_message }} $(date +'%d%m%Y-%H%M%S')" -n
         git push

@@ -1,0 +1,36 @@
+name: Deploy
+description: Deploy the Shopify app extension for a given environment
+
+inputs:
+  app_name:
+    description: "Shopify app config name, matching shopify.app.<app_name>.toml"
+    required: true
+  webhook_url:
+    description: Slack trigger webhook URL for this event
+    required: true
+  slack_id:
+    description: Slack user/owner id (from secrets.SLACKID)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Deploy to Shopify
+      shell: bash
+      env:
+        TZ: Asia/Ho_Chi_Minh
+        BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        MESSAGE="Auto deploy $(date +'%H:%M:%S-%d/%m/%Y')"
+        echo "Deploying with ${{ inputs.app_name }} config"
+        yarn shopify app deploy --config ${{ inputs.app_name }} --allow-updates --allow-deletes --message="$MESSAGE" --source-control-url="${BUILD_URL}"
+
+    - name: Notify release success
+      if: ${{ github.ref_name == 'production' }}
+      uses: gempages/actions/.github/actions/notify@main
+      env:
+        BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      with:
+        webhook_url: ${{ inputs.webhook_url }}
+        slack_id: ${{ inputs.slack_id }}
+        data: '{"slack_id":"${{ inputs.slack_id }}","message":"GemPages Shopify App đã release thành công: ${{ env.BUILD_URL }}"}'
