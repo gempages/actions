@@ -21,7 +21,7 @@ runs:
         TZ: Asia/Ho_Chi_Minh
         BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
-        MESSAGE="Auto deploy $(date +'%H:%M:%S-%d/%m/%Y')"
+        MESSAGE="Auto deploy $(date +'%H:%M:%S %d/%m/%Y')"
         echo "Deploying with ${{ inputs.app_name }} config"
         yarn shopify app deploy --config ${{ inputs.app_name }} --allow-updates --allow-deletes --message="$MESSAGE" --source-control-url="${BUILD_URL}"
 
