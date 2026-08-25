@@ -33,4 +33,4 @@ runs:
       with:
         webhook_url: ${{ inputs.webhook_url }}
         slack_id: ${{ inputs.slack_id }}
-        data: '{"slack_id":"${{ inputs.slack_id }}","message":"GemPages Shopify App đã release thành công: ${{ env.BUILD_URL }}"}'
+        data: '{"slack_id":"${{ inputs.slack_id }}","message":"Shopify App đã release thành công: ${{ env.BUILD_URL }}"}'
