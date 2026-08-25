@@ -17,6 +17,6 @@ runs:
       if: inputs.should_deploy == 'true'
       shell: bash
       run: |
-        git commit --allow-empty -m "${{ inputs.commit_message }} $(date +'%Y%m%d-%H%M%S')" -n
+        git commit --allow-empty -m "${{ inputs.commit_message }} $(date +'%d%m%Y-%H%M%S')" -n
         git push
-        echo "Auto deploy $(date +'%Y%m%d-%H%M%S')"
+        echo "Auto deploy $(date +'%d%m%Y-%H%M%S')"
