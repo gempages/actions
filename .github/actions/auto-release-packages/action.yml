@@ -1,0 +1,86 @@
+name: Deploy packages
+description: Deploy the package to NPM for a given environment
+
+inputs:
+  publish-cmd:
+    description: "Command to publish to packages to NPM registry"
+    required: true
+  install-args:
+    description: "Args passed to yarn install (e.g. '--frozen-lockfile', '--production', or '')"
+    required: false
+    default: ""
+
+outputs:
+  tag:
+    description: "NPM dist-tag derived from the branch (latest/staging/dev)"
+    value: ${{ steps.generateStrings.outputs.tag }}
+  code:
+    description: "Timestamp string generated for commit messages"
+    value: ${{ steps.generateStrings.outputs.code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup project
+      uses: gempages/actions/.github/actions/setup-project@main
+      with:
+        node-version: "22.23.2"
+        cache: yarn
+        fetch-depth: 30
+        install-args: ${{ inputs.install-args }}
+
+    - name: Generate strings
+      id: generateStrings
+      shell: bash
+      env:
+        TZ: Asia/Ho_Chi_Minh
+      run: |
+        echo "code=$(date +'%H:%M:%S %d/%m/%Y')" >> $GITHUB_OUTPUT
+        if [[ "${{ github.ref_name }}" == "production" ]]; then
+          echo "tag=latest" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref_name }}" == "staging" ]]; then
+          echo "tag=staging" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+          echo "tag=dev" >> $GITHUB_OUTPUT
+        else
+          echo "Ref name is not found"
+        fi
+
+    - name: Check pre.json file exits and exit pre mode
+      env:
+        FILE: .changeset/pre.json
+      shell: bash
+      run: |
+        if [[ -f $FILE ]]; then
+          yarn changeset pre exit
+        fi
+
+    - name: Switch release tag
+      if: contains(fromJson('["staging", "dev"]'), github.ref_name)
+      run: yarn changeset pre enter ${{ steps.generateStrings.outputs.tag }}
+
+    - name: Wait for finishing write changeset's pre.json
+      if: contains(fromJson('["staging", "dev"]'), github.ref_name)
+      shell: bash
+      run: sleep 10s
+
+    - name: Publish to Registry
+      id: changesets
+      uses: changesets/action@v1
+      with:
+        publish: ${{ inputs.publish-cmd }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_ACTION_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Auto-merge Version Packages PR
+      if: ${{ steps.changesets.outputs.pullRequestNumber != '' && contains(fromJson('["dev", "staging"]'), github.ref_name) }}
+      env:
+        GH_TOKEN: ${{ secrets.GH_ACTION_TOKEN }}
+      run: gh pr merge ${{ steps.changesets.outputs.pullRequestNumber }} --squash --admin --repo ${{ github.repository }}
+
+    - name: Wait for finishing upload packages to NPM
+      if: steps.changesets.outputs.published == 'true'
+      shell: bash
+      run: sleep 10s

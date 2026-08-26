@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to Shopify
 description: Deploy the Shopify app extension for a given environment
 
 inputs:
