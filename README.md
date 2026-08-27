@@ -11,7 +11,7 @@ Shared CI setup step: checks out the repository, installs Node.js, and installs 
 ```yaml
 - uses: gempages/actions/.github/actions/setup-project@main
   with:
-    node-version: "24.14.0" # optional, defaults to 24.14.0
+    node-version: "22.23.2" # optional, defaults to 22.23.2
     fetch-depth: "1" # optional, defaults to 1
     ref: ${{ github.sha }} # optional, defaults to the triggering ref
     cache: "yarn" # optional, disabled by default
@@ -49,6 +49,36 @@ Commits and pushes whatever is in the working tree as an auto deploy commit. Pai
   with:
     should_deploy: ${{ steps.setup_git.outputs.should_deploy }}
     commit_message: "Auto deploy" # optional, this is the default
+```
+
+### `auto-release-extension`
+
+Deploys a Shopify app extension for a given environment, then notifies Slack on a successful `production` release.
+
+```yaml
+- name: Deploy to Shopify (${{ github.ref_name }})
+  uses: gempages/actions/.github/actions/auto-release-extension@main
+  with:
+    app_name: gempages # Shopify app config name, matching shopify.app.<app_name>.toml
+    webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    slack_id: ${{ secrets.SLACKID }}
+  env:
+    SHOPIFY_APP_AUTOMATION_TOKEN: ${{ secrets.SHOPIFY_CLI_PARTNERS_TOKEN }}
+```
+
+### `auto-release-packages`
+
+Runs `setup-project`, exits/enters changeset pre-release mode based on branch, publishes to NPM via `changesets/action`, and auto-merges the resulting Version Packages PR on `dev`/`staging`. Outputs `tag` (npm dist-tag derived from the branch) and `code` (a timestamp string for commit messages).
+
+```yaml
+- name: Auto release package
+  id: autoRelease
+  uses: gempages/actions/.github/actions/auto-release-packages@main
+  with:
+    publish-cmd: yarn release
+    install-args: --immutable # optional, defaults to ""
+    gh-token: ${{ secrets.GH_ACTION_TOKEN }}
+    npm-token: ${{ secrets.NPM_TOKEN }}
 ```
 
 ### `notify`
