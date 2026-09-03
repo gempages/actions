@@ -17,6 +17,7 @@ runs:
   steps:
     - name: Send notification
       uses: fjogeleit/http-request-action@v2
+      continue-on-error: true
       with:
         url: ${{ inputs.webhook_url }}
         method: "POST"
