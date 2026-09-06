@@ -69,7 +69,7 @@ runs:
     - name: Wait for finishing write changeset's pre.json
       if: contains(fromJson('["staging", "dev"]'), github.ref_name)
       shell: bash
-      run: sleep 10s
+      run: sleep 60s
 
     - name: Publish to Registry
       id: changesets
