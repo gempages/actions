@@ -15,6 +15,17 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Validate extensions
+      shell: bash
+      run: |
+        set -e
+        for dir in extensions/*/; do
+          if [[ -f "${dir}shopify.theme.extension.toml" ]]; then
+            echo "Running theme check on ${dir}"
+            yarn shopify theme check --path "${dir%/}"
+          fi
+        done
+        
     - name: Deploy to Shopify
       shell: bash
       env:
