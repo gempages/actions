@@ -19,6 +19,7 @@ runs:
       env:
         TZ: Asia/Ho_Chi_Minh
       run: |
-        git commit --allow-empty -m "${{ inputs.commit_message }} $(date +'%d%m%Y-%H%M%S')" -n
+        MESSAGE="${{ inputs.commit_message }} ${{ github.ref_name }} $(date +'%H:%M:%S %d/%m/%Y')"
+        git commit --allow-empty -m "$MESSAGE" -n
         git push
-        echo "Auto deploy $(date +'%d%m%Y-%H%M%S')"
+        echo "$MESSAGE"
