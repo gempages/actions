@@ -94,4 +94,4 @@ runs:
     - name: Wait for finishing upload packages to NPM
       if: steps.changesets.outputs.published == 'true'
       shell: bash
-      run: sleep 10s
+      run: sleep 20s
