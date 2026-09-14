@@ -15,6 +15,9 @@ inputs:
   npm-token:
     description: "NPM token used to publish packages to the registry"
     required: true
+  node-version:
+    description: "NodeS version"
+    default: "22.23.2"
 
 outputs:
   tag:
@@ -30,7 +33,7 @@ runs:
     - name: Setup project
       uses: gempages/actions/.github/actions/setup-project@main
       with:
-        node-version: "22.23.2"
+        node-version: ${{ inputs.node-version }}
         cache: yarn
         fetch-depth: 30
         install-args: ${{ inputs.install-args }}
