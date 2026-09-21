@@ -16,6 +16,11 @@ runs:
   using: composite
   steps:
     - name: Send notification
+      # Never fire while running locally under act (https://nektosact.com): the
+      # webhook is a real Slack trigger. act sets ACT=true in the job environment;
+      # on GitHub the variable is unset, so this is a no-op there. Must stay at
+      # step level -- `env` is not an allowed context in a job-level `if`.
+      if: ${{ !env.ACT }}
       uses: fjogeleit/http-request-action@v2
       continue-on-error: true
       with:
