@@ -34,11 +34,23 @@ inputs:
 runs:
   using: composite
   steps:
+    # act (https://nektosact.com) substitutes a copy of the local working tree for
+    # actions/checkout, but only when no `ref` is supplied -- any `ref`, even an
+    # expression, makes it clone from the remote instead, so a local run would test
+    # the last pushed commit rather than the code on disk. These two steps are
+    # mutually exclusive: GitHub takes the first (unchanged), act takes the second.
     - name: Check out code
+      if: ${{ !env.ACT }}
       uses: actions/checkout@v6
       with:
         fetch-depth: ${{ inputs.fetch-depth }}
         ref: ${{ inputs.ref }}
+
+    - name: Check out code (act -- local working tree)
+      if: ${{ env.ACT }}
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
 
     - name: Use Node.js ${{ inputs.node-version }}
       uses: actions/setup-node@v6
