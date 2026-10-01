@@ -12,7 +12,7 @@ inputs:
   excluded_authors:
     description: JSON array of commit author usernames that should NOT trigger auto deploy
     required: false
-    default: '["haicaodac","HarrisonD-Seal","TheoVu197","VinhVictor","github-actions[bot]"]'
+    default: '["haicaodac","HarrisonD-Seal","github-actions[bot]"]'
 
 outputs:
   should_deploy:
