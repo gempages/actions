@@ -11,7 +11,7 @@ Shared CI setup step: checks out the repository, installs Node.js, and installs 
 ```yaml
 - uses: gempages/actions/.github/actions/setup-project@main
   with:
-    node-version: "22.23.2" # optional, defaults to 22.23.2
+    node-version: "24.22.1" # optional, defaults to 24.22.1
     fetch-depth: "1" # optional, defaults to 1
     ref: ${{ github.sha }} # optional, defaults to the triggering ref
     cache: "yarn" # optional, disabled by default
